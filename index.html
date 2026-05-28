@@ -2,168 +2,330 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>名札作成ツール</title>
+<link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
-  :root {
-    --bg: #f0f0f0; --surface: #fff; --border: #ccc;
-    --text: #111; --text-muted: #666;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Noto Sans JP','Hiragino Kaku Gothic ProN','Meiryo',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
-  header { background:#222; color:#fff; padding:14px 28px; display:flex; align-items:center; gap:10px; }
-  header h1 { font-size:1rem; font-weight:500; letter-spacing:.06em; }
-  header span { font-size:.8rem; color:#aaa; margin-left:auto; }
-  .app { display:grid; grid-template-columns:380px 1fr; min-height:calc(100vh - 48px); }
-  .panel { background:var(--surface); border-right:1px solid var(--border); padding:20px; overflow-y:auto; }
-  .panel-title { font-size:.68rem; font-weight:700; letter-spacing:.1em; color:#444; text-transform:uppercase; margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--border); }
-  .person-card { border:1px solid var(--border); border-radius:6px; padding:14px; margin-bottom:10px; background:#fafafa; }
-  .card-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-  .card-num { font-size:.68rem; font-weight:700; color:#555; background:#e8e8e8; padding:2px 8px; border-radius:20px; }
-  .btn-remove { background:none; border:1px solid #ccc; color:#888; cursor:pointer; font-size:.85rem; padding:1px 7px; border-radius:4px; transition:all .15s; }
-  .btn-remove:hover { border-color:#999; color:#333; background:#eee; }
-  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
-  .form-row.full { grid-template-columns:1fr; }
-  label { display:block; font-size:.65rem; color:var(--text-muted); margin-bottom:3px; font-weight:500; }
-  input, select { width:100%; border:1px solid var(--border); border-radius:4px; padding:6px 8px; font-size:.85rem; font-family:inherit; background:#fff; color:var(--text); outline:none; transition:border-color .15s; }
-  input:focus, select:focus { border-color:#555; }
-  .btn-add { width:100%; padding:10px; border:1.5px dashed #bbb; border-radius:6px; background:none; color:#888; font-size:.85rem; font-family:inherit; cursor:pointer; transition:all .2s; margin-bottom:16px; }
-  .btn-add:hover { border-color:#666; color:#333; background:#f5f5f5; }
-  .btn-print { width:100%; padding:12px; background:#222; color:#fff; border:none; border-radius:6px; font-size:.92rem; font-family:inherit; font-weight:600; cursor:pointer; letter-spacing:.05em; transition:background .15s; }
-  .btn-print:hover { background:#000; }
-  .preview { padding:28px; overflow-y:auto; }
-  .preview-header { display:flex; align-items:baseline; gap:12px; margin-bottom:20px; }
-  .preview-title { font-size:.68rem; font-weight:700; letter-spacing:.1em; color:#444; text-transform:uppercase; }
-  .badge-note { font-size:.7rem; color:#999; }
-  .badges-grid { display:flex; flex-wrap:wrap; gap:18px; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-  /* 名札本体：縦56mm×横89mm、プレビュー1.2倍 */
-  /* 96dpi: 1mm=3.7795px → 56mm≒212px, 89mm≒336px; ×1.2→254×403 */
+body {
+  font-family: 'Kosugi Maru', sans-serif;
+  background: #f5f5f5;
+  color: #222;
+  min-height: 100vh;
+}
+
+header {
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+  padding: 14px 16px 10px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+header h1 { font-size: 1rem; font-weight: 700; letter-spacing: .04em; }
+header p  { font-size: .72rem; color: #888; margin-top: 2px; }
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px 14px 80px;
+}
+
+.howto {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  font-size: .78rem;
+  color: #555;
+  line-height: 1.8;
+}
+.howto strong { display: block; font-size: .8rem; color: #222; margin-bottom: 6px; }
+.howto ol { padding-left: 1.4em; }
+
+.person-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 14px 14px 10px;
+  margin-bottom: 10px;
+}
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.card-num { font-size: .7rem; color: #888; background: #f0f0f0; padding: 2px 10px; border-radius: 20px; }
+.btn-remove {
+  background: none; border: 1px solid #ccc; color: #999;
+  font-size: .78rem; padding: 3px 10px; border-radius: 4px;
+  cursor: pointer; font-family: inherit;
+}
+.btn-remove:active { background: #f0f0f0; }
+
+label { display: block; font-size: .68rem; color: #888; margin-bottom: 4px; }
+input[type="text"] {
+  width: 100%; border: 1px solid #ddd; border-radius: 6px;
+  padding: 9px 11px; font-size: 1rem; font-family: inherit;
+  color: #222; background: #fafafa; outline: none;
+  margin-bottom: 10px; -webkit-appearance: none;
+}
+input[type="text"]:focus { border-color: #888; background: #fff; }
+input.furigana { font-size: .9rem; }
+
+.btn-add {
+  width: 100%; padding: 12px; border: 1.5px dashed #ccc;
+  border-radius: 10px; background: none; color: #888;
+  font-size: .9rem; font-family: inherit; cursor: pointer; margin-bottom: 12px;
+}
+.btn-add:active { background: #f0f0f0; }
+
+.btn-print {
+  width: 100%; padding: 14px; background: #222; color: #fff;
+  border: none; border-radius: 10px; font-size: 1rem;
+  font-family: inherit; font-weight: 700; letter-spacing: .06em; cursor: pointer;
+}
+.btn-print:active { background: #000; }
+
+/* 印刷エリアは画面非表示 */
+.print-area { display: none; }
+
+@media print {
+  @page { size: A4 portrait; margin: 10mm; }
+  body, html { background: #fff; }
+  header, .container { display: none !important; }
+
+  .print-area {
+    display: block !important;
+  }
+
+  .print-page {
+    display: grid;
+    grid-template-columns: 89mm 89mm;
+    width: 178mm;
+    border-top: 0.3mm solid #bbb;
+    border-left: 0.3mm solid #bbb;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  .print-page:last-child {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
   .badge {
-    width:403px; height:254px;
-    background:#fff; border:1px solid #888;
-    overflow:hidden; display:flex; flex-direction:row;
-    font-family:'Noto Sans JP','Hiragino Kaku Gothic ProN','Meiryo',sans-serif;
-    flex-shrink:0;
+    display: flex !important;
+    width: 89mm;
+    height: 43mm;
+    border-right: 0.3mm solid #bbb;
+    border-bottom: 0.3mm solid #bbb;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+    background: #fff;
+    padding: 1.5mm 3mm;
+    gap: 0.5mm;
+    overflow: hidden;
   }
-  .badge-side {
-    width:64px; background:#fff; border-right:2px solid #222;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap:4px; padding:12px 6px; flex-shrink:0;
-  }
-  .badge-grade-text { font-size:14px; font-weight:700; color:#111; letter-spacing:.05em; writing-mode:vertical-rl; text-orientation:mixed; }
-  .badge-dept-text  { font-size:24px; font-weight:700; color:#111; writing-mode:vertical-rl; text-orientation:mixed; }
-  .badge-main { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px 20px; gap:8px; }
-  .badge-furigana { font-size:12px; color:#444; letter-spacing:.18em; font-weight:400; }
-  .badge-name { font-size:44px; font-weight:700; color:#111; letter-spacing:.08em; text-align:center; line-height:1.1; word-break:break-all; }
 
-  @media print {
-    @page { size:A4 portrait; margin:10mm; }
-    body { background:#fff; }
-    header, .panel, .preview-header { display:none !important; }
-    .app { display:block; }
-    .preview { padding:0; }
-    .badges-grid { display:flex; flex-wrap:wrap; gap:4mm; justify-content:flex-start; }
-    .badge { width:89mm; height:56mm; border:0.3mm solid #555; page-break-inside:avoid; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .badge-side { width:14mm; border-right:0.4mm solid #222; padding:3mm 2mm; gap:2mm; }
-    .badge-grade-text { font-size:7pt; }
-    .badge-dept-text  { font-size:11pt; }
-    .badge-main { padding:4mm 5mm; gap:2mm; }
-    .badge-furigana { font-size:6.5pt; letter-spacing:.12em; }
-    .badge-name { font-size:22pt; }
+  .badge .badge-furigana {
+    font-family: 'Kosugi Maru', sans-serif;
+    font-size: 7.5pt;
+    color: #555;
+    letter-spacing: .15em;
+    text-align: center;
+    flex-shrink: 0;
   }
+
+  .badge .badge-name {
+    font-family: 'Kosugi Maru', sans-serif;
+    color: #111;
+    letter-spacing: .06em;
+    text-align: center;
+    line-height: 1.0;
+    word-break: break-all;
+    /* font-sizeはJS側でインラインstyleで設定 */
+  }
+}
+
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.btn-add {
+  margin-bottom: 0;
+}
+.btn-csv {
+  width: 100%; padding: 12px; border: 1.5px solid #ccc;
+  border-radius: 10px; background: #fff; color: #444;
+  font-size: .9rem; font-family: inherit; cursor: pointer;
+}
+.btn-csv:active { background: #f0f0f0; }
+.csv-note {
+  font-size: .75rem; color: #555; background: #f0f0f0;
+  border-radius: 6px; padding: 8px 12px; margin-bottom: 12px;
+}
 </style>
 </head>
 <body>
+
 <header>
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-4 0v2"/></svg>
   <h1>名札作成ツール</h1>
-  <span>縦56 × 横89 mm</span>
+  <p>縦43 × 横89 mm</p>
 </header>
-<div class="app">
-  <div class="panel">
-    <div class="panel-title">参加者情報の入力</div>
-    <div id="cards"></div>
+
+<div class="container">
+  <div class="howto">
+    <strong>📋 使い方</strong>
+    <ol>
+      <li>名前とふりがなを入力してください</li>
+      <li>「＋ 人を追加」で人数分増やせます</li>
+      <li>「印刷する」を押してA4用紙に印刷してください（2列、最大12人/枚）</li>
+      <li>灰色の枠線に沿ってハサミで切ってご使用ください</li>
+      <li>CSVは「名前,ふりがな」を1行1人で作成してください（ヘッダー行不要）</li>
+    </ol>
+  </div>
+
+  <div id="cards"></div>
+  <div class="btn-row">
     <button class="btn-add" onclick="addPerson()">＋ 人を追加</button>
-    <button class="btn-print" onclick="window.print()">🖨　印刷する</button>
+    <button class="btn-csv" onclick="document.getElementById('csvInput').click()">📂 CSVを読み込む</button>
   </div>
-  <div class="preview">
-    <div class="preview-header">
-      <div class="preview-title">プレビュー</div>
-      <div class="badge-note">実寸 縦56 × 横89mm で印刷されます</div>
-    </div>
-    <div class="badges-grid" id="badges"></div>
-  </div>
+  <input type="file" id="csvInput" accept=".csv,text/csv" style="display:none" onchange="importCSV(this)">
+  <div id="csvNote" class="csv-note" style="display:none"></div>
+  <button class="btn-print" onclick="window.print()">🖨 印刷する</button>
 </div>
+
+<!-- 印刷専用（画面非表示） -->
+<div class="print-area" id="printArea"></div>
+
 <script>
-  const currentYear = new Date().getFullYear();
-  const maxKi = currentYear - 1983;
-  const gradeOptions = ['1年','2年','3年','4年','5年','6年'];
-  const kiOptions = Array.from({length:maxKi},(_,i)=>`${i+1}期`);
-  const deptOptions = ['医','看'];
+let people = [
+  { name: '山田 太郎', furigana: 'やまだ たろう' },
+  { name: '鈴木 花子', furigana: 'すずき はなこ' },
+];
 
-  let people = [
-    {grade:'1年',dept:'医',name:'山田 太郎',furigana:'やまだ たろう'},
-    {grade:'2年',dept:'看',name:'鈴木 花子',furigana:'すずき はなこ'},
-  ];
 
-  function addPerson(){people.push({grade:'1年',dept:'医',name:'',furigana:''});render();}
-  function removePerson(i){if(people.length===1)return;people.splice(i,1);render();}
-  function update(i,field,val){people[i][field]=val;renderBadges();}
-  function render(){renderCards();renderBadges();}
+function importCSV(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const lines = e.target.result
+      .split(/\r?\n/)
+      .map(l => l.trim())
+      .filter(l => l.length > 0);
 
-  function renderCards(){
-    document.getElementById('cards').innerHTML=people.map((p,i)=>`
-      <div class="person-card">
-        <div class="card-header">
-          <span class="card-num">No.${i+1}</span>
-          <button class="btn-remove" onclick="removePerson(${i})">削除</button>
-        </div>
-        <div class="form-row">
-          <div>
-            <label>学年</label>
-            <select onchange="update(${i},'grade',this.value)">
-              <optgroup label="学年">
-                ${gradeOptions.map(g=>`<option${p.grade===g?' selected':''}>${g}</option>`).join('')}
-              </optgroup>
-              <optgroup label="期（卒業生等）">
-                ${kiOptions.map(g=>`<option${p.grade===g?' selected':''}>${g}</option>`).join('')}
-              </optgroup>
-            </select>
-          </div>
-          <div>
-            <label>学科</label>
-            <select onchange="update(${i},'dept',this.value)">
-              ${deptOptions.map(d=>`<option${p.dept===d?' selected':''}>${d}</option>`).join('')}
-            </select>
-          </div>
-        </div>
-        <div class="form-row full">
-          <div><label>ふりがな</label><input type="text" value="${esc(p.furigana)}" placeholder="やまだ たろう" oninput="update(${i},'furigana',this.value)"></div>
-        </div>
-        <div class="form-row full">
-          <div><label>名前（漢字）</label><input type="text" value="${esc(p.name)}" placeholder="山田 太郎" oninput="update(${i},'name',this.value)"></div>
-        </div>
-      </div>`).join('');
-  }
+    const imported = [];
+    const errors = [];
+    lines.forEach((line, idx) => {
+      // カンマで分割（最初のカンマのみ）
+      const comma = line.indexOf(',');
+      if (comma === -1) {
+        errors.push(`${idx+1}行目: カンマが見つかりません`);
+        return;
+      }
+      const name     = line.slice(0, comma).trim();
+      const furigana = line.slice(comma + 1).trim();
+      if (!name) { errors.push(`${idx+1}行目: 名前が空です`); return; }
+      imported.push({ name, furigana });
+    });
 
-  function renderBadges(){
-    document.getElementById('badges').innerHTML=people.map(p=>`
-      <div class="badge">
-        <div class="badge-side">
-          <div class="badge-grade-text">${esc(p.grade)}</div>
-          <div class="badge-dept-text">${esc(p.dept)}</div>
-        </div>
-        <div class="badge-main">
-          <div class="badge-furigana">${esc(p.furigana)||'&nbsp;'}</div>
-          <div class="badge-name">${esc(p.name)||'<span style="color:#ccc;font-size:24px">名前未入力</span>'}</div>
-        </div>
-      </div>`).join('');
-  }
+    if (imported.length > 0) {
+      people = imported;
+      render();
+    }
 
-  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+    const note = document.getElementById('csvNote');
+    if (errors.length > 0) {
+      note.style.display = 'block';
+      note.textContent = `${imported.length}人を読み込みました。スキップ: ${errors.join(' / ')}`;
+    } else {
+      note.style.display = 'block';
+      note.textContent = `✅ ${imported.length}人を読み込みました`;
+      setTimeout(() => { note.style.display = 'none'; }, 3000);
+    }
+    // 同じファイルを再度選べるようリセット
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function addPerson() {
+  people.push({ name: '', furigana: '' });
   render();
+  setTimeout(() => {
+    const cards = document.querySelectorAll('.person-card');
+    if (cards.length) cards[cards.length-1].scrollIntoView({behavior:'smooth',block:'center'});
+  }, 50);
+}
+
+function removePerson(i) {
+  if (people.length === 1) return;
+  people.splice(i, 1);
+  render();
+}
+
+function update(i, field, val) {
+  people[i][field] = val;
+  renderPrintArea();
+}
+
+function render() {
+  renderCards();
+  renderPrintArea();
+}
+
+function renderCards() {
+  document.getElementById('cards').innerHTML = people.map((p, i) => `
+    <div class="person-card">
+      <div class="card-top">
+        <span class="card-num">${i+1} 人目</span>
+        <button class="btn-remove" onclick="removePerson(${i})">削除</button>
+      </div>
+      <label>ふりがな</label>
+      <input class="furigana" type="text" value="${esc(p.furigana)}"
+        placeholder="やまだ たろう"
+        oninput="update(${i},'furigana',this.value)"
+        inputmode="hiragana">
+      <label>名前</label>
+      <input type="text" value="${esc(p.name)}"
+        placeholder="山田 太郎"
+        oninput="update(${i},'name',this.value)">
+    </div>
+  `).join('');
+}
+
+function renderPrintArea() {
+  const PER_PAGE = 12;
+  const pages = [];
+  for (let i = 0; i < people.length; i += PER_PAGE) {
+    pages.push(people.slice(i, i + PER_PAGE));
+  }
+  document.getElementById('printArea').innerHTML = pages.map(group => {
+    const badges = group.map(p => `
+      <div class="badge">
+        <div class="badge-furigana" style="font-size:15pt">${esc(p.furigana) || '&nbsp;'}</div>
+        <div class="badge-name" style="font-size:37pt">${esc(p.name) || '&nbsp;'}</div>
+      </div>`).join('');
+    return `<div class="print-page">${badges}</div>`;
+  }).join('');
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+render();
 </script>
 </body>
 </html>
